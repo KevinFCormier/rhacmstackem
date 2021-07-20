@@ -11,7 +11,7 @@ git clone https://github.com/open-cluster-management/deploy.git
 git clone https://github.com/open-cluster-management/cluster-keeper.git
 pushd cluster-keeper
 cat > user.env << EOF
-CLUSTERPOOL_CLUSTER=$CLUSTERPOOL_CLUSTER
+CLUSTERPOOL_CLUSTER=https://$(getent hosts kubernetes.default.svc | cut -f 1 -d ' '):443
 CLUSTERPOOL_TARGET_NAMESPACE=$CLUSTERPOOL_TARGET_NAMESPACE
 CLUSTERCLAIM_GROUP_NAME=$CLUSTERCLAIM_GROUP_NAME
 EOF
@@ -96,6 +96,7 @@ unset KUBECONFIG
 
 # Enable service accounts for use with cluster-keeper
 echo "##### Enabling service accounts for cluster-keeper #####"
+oc config set-context ck
 ck enable-sa $CLUSTERCLAIM_NAME
 # Enable/disable scheduled hibernation
 if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true"]]; then
