@@ -62,7 +62,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: rhacmstackem
-            image: quay.io/dhaiduce/rhacmstackem
+            image: quay.io/kcormier/rhacmstackem
             env:
             - name: GIT_USER
               valueFrom:

@@ -4,7 +4,7 @@ set -e
 
 # Clone requisite repos and store paths
 echo "$(date) ##### Cloning Lifeguard, Deploy, Pipeline, and StartRHACM repos"
-git clone https://github.com/dhaiducek/startrhacm.git
+git clone https://github.com/KevinFCormier/startrhacm.git
 git clone https://github.com/open-cluster-management/lifeguard.git
 git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/open-cluster-management/pipeline.git"
 git clone https://github.com/open-cluster-management/deploy.git
