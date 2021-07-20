@@ -114,6 +114,8 @@ spec:
               value: "${INSTALL_ICSP:-false}"
             - name: CLAIM_REUSE
               value: "${CLAIM_REUSE}" 
+            - name: SCHEDULED_HIBERNATION
+              value: "${SCHEDULED_HIBERNATION:-false}"
 EOF
 
 echo ""

@@ -10,6 +10,15 @@ git clone https://github.com/dhaiducek/startrhacm.git
 git clone https://github.com/stolostron/lifeguard.git
 git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/stolostron/pipeline.git"
 git clone https://github.com/stolostron/deploy.git
+git clone https://github.com/stolostron/cluster-keeper.git
+pushd cluster-keeper
+cat > user.env << EOF
+CLUSTERPOOL_CLUSTER=https://$(getent hosts kubernetes.default.svc | cut -f 1 -d ' '):443
+CLUSTERPOOL_TARGET_NAMESPACE=$CLUSTERPOOL_TARGET_NAMESPACE
+CLUSTERCLAIM_GROUP_NAME=$CLUSTERCLAIM_GROUP_NAME
+EOF
+export PATH=${PATH}:$(pwd)
+popd
 
 export LIFEGUARD_PATH=/lifeguard
 export RHACM_PIPELINE_PATH=/pipeline
@@ -122,6 +131,23 @@ if [[ "${ERROR_CODE}" != "1" ]]; then
     fi
   fi
 fi
+
+# Back to ClusterPool host
+unset KUBECONFIG
+
+# Enable service accounts for use with cluster-keeper
+echo "##### Enabling service accounts for cluster-keeper #####"
+oc config set-context ck
+ck enable-sa $CLUSTERCLAIM_NAME
+# Enable/disable scheduled hibernation
+if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true" ]]; then
+  echo "Enabling scheduled hibernation"
+  ck enable-schedule $CLUSTERCLAIM_NAME
+else
+  echo "Disabling scheduled hibernation"
+  ck disable-schedule $CLUSTERCLAIM_NAME
+fi
+
 
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then

@@ -45,6 +45,7 @@ Image URL: `quay.io/dhaiduce/rhacmstackem`
   export CONSOLE_BANNER_COLOR="#fff" # Color of the text in the banner
   export CONSOLE_BANNER_BGCOLOR="#316DC1" # Color of the banner
   export SCHEDULE="" # Set a custom CronJob schedule (default: "15 11 * * 1-5")
+  export SCHEDULED_HIBERNATION="" # Set to "true" to enable scheduled hibernation by hibernate-cronjob (default: "false")
   ```
   **NOTE**: Additional exports to further configure the deployment can be found in the [`StartRHACM` configuration](https://github.com/dhaiducek/startrhacm/blob/main/utils/config.sh.template)
 3. Change to the `deployment/` directory and run the `rhacmstackem_deployment.yaml.sh` script to create the necessary YAML files:
