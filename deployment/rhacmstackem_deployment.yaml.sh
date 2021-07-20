@@ -47,13 +47,13 @@ kind: CronJob
 metadata:
   name: rhacmstackem-cronjob
 spec:
-#            ┌───────────── minute (0 - 59)
-#            │  ┌───────────── hour (0 - 23) (Time in UTC)
-#            │  │  ┌───────────── day of the month (1 - 31)
-#            │  │  │ ┌───────────── month (1 - 12)
-#            │  │  │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
-#            │  │  │ │ │
-  schedule: "15 11 * * 1-5"
+#                         ┌───────────── minute (0 - 59)
+#                         │  ┌───────────── hour (0 - 23) (Time in UTC)
+#                         │  │  ┌───────────── day of the month (1 - 31)
+#                         │  │  │ ┌───────────── month (1 - 12)
+#                         │  │  │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+#                         │  │  │ │ │
+  schedule: "${SCHEDULE:-"15 11 * * 1-5"}"
   jobTemplate:
     spec:
       template:
