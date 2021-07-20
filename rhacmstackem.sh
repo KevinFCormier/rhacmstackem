@@ -67,15 +67,6 @@ echo "$(date) ##### Running StartRHACM"
 export DISABLE_CLUSTER_CHECK="true"
 ./startrhacm/startrhacm.sh
 
-# Enable service accounts for use with cluster-keeper
-ck enable-sa $CLUSTERCLAIM_NAME
-# Enable/disable scheduled hibernation
-if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true"]]; then
-  ck enable-schedule $CLUSTERCLAIM_NAME
-else
-  ck disable-schedule $CLUSTERCLAIM_NAME
-fi
-
 # Point to claimed cluster and set up RBAC users
 if [[ "${RBAC_SETUP:-"true"}" == "true" ]]; then
   RBAC_IDP_NAME=${RBAC_IDP_NAME:-"e2e-htpasswd"}
@@ -100,6 +91,22 @@ if [[ "${RBAC_SETUP:-"true"}" == "true" ]]; then
   export RBAC_INFO="*RBAC Users*: e2e-<cluster-admin/admin/edit/view>-<cluster/ns>\\\n*RBAC Password*: ${RBAC_PASS}\\\n"
 fi
 
+# Back to ClusterPool host
+unset KUBECONFIG
+
+# Enable service accounts for use with cluster-keeper
+echo "##### Enabling service accounts for cluster-keeper #####"
+ck enable-sa $CLUSTERCLAIM_NAME
+# Enable/disable scheduled hibernation
+if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true"]]; then
+  echo "Enabling scheduled hibernation"
+  ck enable-schedule $CLUSTERCLAIM_NAME
+else
+  echo "Disabling scheduled hibernation"
+  ck disable-schedule $CLUSTERCLAIM_NAME
+fi
+
+
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
   echo "$(date) ##### Posting information to Slack"
@@ -109,7 +116,6 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
   SNAPSHOT=$(oc get pod -l app=acm-custom-registry -o jsonpath='{.items[].spec.containers[0].image}' | grep -o "[0-9]\+\..*SNAPSHOT.*$")
   RHACM_URL=$(oc get routes multicloud-console -o jsonpath='{.status.ingress[0].host}')
   # Get expiration time from the ClusterClaim
-  unset KUBECONFIG
   CLAIM_CREATION=$(oc get clusterclaim.hive ${CLUSTERCLAIM_NAME} -n ${CLUSTERPOOL_TARGET_NAMESPACE} -o jsonpath={.metadata.creationTimestamp})
   LIFETIME_DIFF="+$(oc get clusterclaim.hive ${CLUSTERCLAIM_NAME} -n ${CLUSTERPOOL_TARGET_NAMESPACE} -o jsonpath={.spec.lifetime} | sed 's/h/hour/' | sed 's/m/min/' | sed 's/s/sec/')"
   CLAIM_EXPIRATION=$(date -d "${CLAIM_CREATION}${LIFETIME_DIFF}-20min" +%s)
