@@ -99,7 +99,7 @@ echo "##### Enabling service accounts for cluster-keeper #####"
 oc config set-context ck
 ck enable-sa $CLUSTERCLAIM_NAME
 # Enable/disable scheduled hibernation
-if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true"]]; then
+if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true" ]]; then
   echo "Enabling scheduled hibernation"
   ck enable-schedule $CLUSTERCLAIM_NAME
 else
