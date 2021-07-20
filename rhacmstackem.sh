@@ -8,6 +8,15 @@ git clone https://github.com/dhaiducek/startrhacm.git
 git clone https://github.com/open-cluster-management/lifeguard.git
 git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/open-cluster-management/pipeline.git"
 git clone https://github.com/open-cluster-management/deploy.git
+git clone https://github.com/open-cluster-management/cluster-keeper.git
+pushd cluster-keeper
+cat > user.env << EOF
+CLUSTERPOOL_CLUSTER=$CLUSTERPOOL_CLUSTER
+CLUSTERPOOL_TARGET_NAMESPACE=$CLUSTERPOOL_TARGET_NAMESPACE
+CLUSTERCLAIM_GROUP_NAME=$CLUSTERCLAIM_GROUP_NAME
+EOF
+export PATH=${PATH}:$(pwd)
+popd
 
 export LIFEGUARD_PATH=/lifeguard
 export RHACM_PIPELINE_PATH=/pipeline
@@ -57,6 +66,15 @@ fi
 echo "$(date) ##### Running StartRHACM"
 export DISABLE_CLUSTER_CHECK="true"
 ./startrhacm/startrhacm.sh
+
+# Enable service accounts for use with cluster-keeper
+ck enable-sa $CLUSTERCLAIM_NAME
+# Enable/disable scheduled hibernation
+if [[ "${SCHEDULED_HIBERNATION:-"false"}" == "true"]]; then
+  ck enable-schedule $CLUSTERCLAIM_NAME
+else
+  ck disable-schedule $CLUSTERCLAIM_NAME
+fi
 
 # Point to claimed cluster and set up RBAC users
 if [[ "${RBAC_SETUP:-"true"}" == "true" ]]; then

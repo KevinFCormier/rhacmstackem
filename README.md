@@ -42,6 +42,7 @@ Image URL: `quay.io/dhaiduce/rhacmstackem`
   export INSTALL_ICSP="" # Whether to install ImageContentSourcePolicy to access downstream repos (default: "false")
   export CLAIM_REUSE="" # Controls initial cleanup behavior (default: "delete"): "delete" - Delete existing claims prior to a deploy; "update" - Reuse existing claim; Any other non-empty value will exit the script and not attempt to deploy
   export SCHEDULE="" # Set a custom CronJob schedule (default: "15 11 * * 1-5")
+  export SCHEDULED_HIBERNATION="" # Set to "true" to enable scheduled hibernation by hibernate-cronjob (default: "false")
   ```
 3. Change to the `deployment/` directory and run the `rhacmstackem_deployment.yaml.sh` script to create the necessary YAML files:
   ```bash
