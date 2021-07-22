@@ -107,6 +107,9 @@ else
   ck disable-schedule $CLUSTERCLAIM_NAME
 fi
 
+echo "##### Waiting 10 minutes for ACM route to be created #####"
+sleep 600
+
 
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
