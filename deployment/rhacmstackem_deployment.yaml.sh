@@ -54,9 +54,10 @@ spec:
 #                         │  │  │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
 #                         │  │  │ │ │
   schedule: "${SCHEDULE:-"15 11 * * 1-5"}"
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 1
+      backoffLimit: 0
       template:
         spec:
           serviceAccountName: ${SERVICE_ACCOUNT_NAME}
