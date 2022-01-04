@@ -5,10 +5,10 @@ set -e
 # Clone requisite repos and store paths
 echo "$(date) ##### Cloning Lifeguard, Deploy, Pipeline, and StartRHACM repos"
 git clone https://github.com/KevinFCormier/startrhacm.git
-git clone https://github.com/open-cluster-management/lifeguard.git
-git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/open-cluster-management/pipeline.git"
-git clone https://github.com/open-cluster-management/deploy.git
-git clone https://github.com/open-cluster-management/cluster-keeper.git
+git clone https://github.com/stolostron/lifeguard.git
+git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/stolostron/pipeline.git"
+git clone https://github.com/stolostron/deploy.git
+git clone https://github.com/stolostron/cluster-keeper.git
 pushd cluster-keeper
 cat > user.env << EOF
 CLUSTERPOOL_CLUSTER=https://$(getent hosts kubernetes.default.svc | cut -f 1 -d ' '):443
