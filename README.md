@@ -34,6 +34,7 @@ Image URL: `quay.io/kcormier/rhacmstackem`
   export SLACK_TOKEN="" # Slack token to post cluster information and a scheduled expiration message to a channel using the Slack API (requires channel ID)
   export SLACK_CHANNEL_ID="" # Slack Channel ID to post cluster information and a scheduled expiration message to a channel using the Slack API (requires token)
   export CLUSTERPOOL_MIN_SIZE="" # Minimum size of ClusterPool to scale to before creating claim (default: "1")
+  export CLUSTERPOOL_POST_DEPLOY_SIZE="" # Set the size of the ClusterPool post-deployment
   export CLUSTERCLAIM_NAME="" # Name to use for ClusterClaim (default: "rhacmstackem-${CLUSTERPOOL_NAME}")
   export CLUSTERCLAIM_LIFETIME="" # Lifetime of claimed cluster (default: "12h")
   export AUTH_REDIRECT_PATHS="" # Oauth redirect paths in a space-separated string (default: "") Example: "/ /path1/ /path2/"
@@ -44,6 +45,7 @@ Image URL: `quay.io/kcormier/rhacmstackem`
   export SCHEDULE="" # Set a custom CronJob schedule (default: "15 11 * * 1-5")
   export SCHEDULED_HIBERNATION="" # Set to "true" to enable scheduled hibernation by hibernate-cronjob (default: "false")
   ```
+  **NOTE**: Additional exports to further configure the deployment can be found in the [`StartRHACM` configuration](https://github.com/dhaiducek/startrhacm/blob/main/utils/config.sh.template)
 3. Change to the `deployment/` directory and run the `rhacmstackem_deployment.yaml.sh` script to create the necessary YAML files:
   ```bash
   cd deployment/
