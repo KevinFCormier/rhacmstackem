@@ -2,6 +2,8 @@
 
 set -e
 
+ERROR_CODE=0
+
 # Clone requisite repos and store paths
 echo "$(date) ##### Cloning Lifeguard, Deploy, Pipeline, and StartRHACM repos"
 git clone https://github.com/KevinFCormier/startrhacm.git
@@ -50,9 +52,19 @@ if (oc get -n ${CLUSTERPOOL_TARGET_NAMESPACE} clusterclaim.hive ${CLUSTERCLAIM_N
     delete)
       CLUSTERDEPLOYMENT=$(oc get -n ${CLUSTERPOOL_TARGET_NAMESPACE} clusterclaim.hive ${CLUSTERCLAIM_NAME}  -o jsonpath='{.spec.namespace}')
       oc delete -n ${CLUSTERPOOL_TARGET_NAMESPACE} clusterclaim.hive ${CLUSTERCLAIM_NAME}
-      echo "* Waiting for Hive to process ClusterDeployment for deletion:"
-      oc get -n ${CLUSTERDEPLOYMENT} clusterdeployment.hive ${CLUSTERDEPLOYMENT}
-      sleep 30
+      echo "* Waiting up to 5 minutes for Hive to process ClusterDeployment for deletion"
+      READY="false"
+      ATTEMPTS=0
+      MAX_ATTEMPTS=10
+      INTERVAL=30
+      while (oc get -n ${CLUSTERDEPLOYMENT} clusterdeployment.hive ${CLUSTERDEPLOYMENT}) && (( ATTEMPTS != MAX_ATTEMPTS )); do
+        echo "* Waiting another ${INTERVAL}s for cluster deployment cleanup (Retry $((++ATTEMPTS))/${MAX_ATTEMPTS})"
+        sleep ${INTERVAL}
+      done
+      if (oc get -n ${CLUSTERDEPLOYMENT} clusterdeployment.hive ${CLUSTERDEPLOYMENT} &>/dev/null); then
+        echo "* Manually deleting ClusterDeployment ${CLUSTERDEPLOYMENT}"
+        oc delete -n ${CLUSTERDEPLOYMENT} clusterdeployment.hive ${CLUSTERDEPLOYMENT}
+      fi
       ;;
     update)
       echo "* Reusing existing claim"
@@ -69,7 +81,7 @@ fi
 # Run StartRHACM to claim cluster and deploy RHACM
 echo "$(date) ##### Running StartRHACM"
 export DISABLE_CLUSTER_CHECK="true"
-./startrhacm/startrhacm.sh
+./startrhacm/startrhacm.sh || ERROR_CODE=1
 
 # Point to claimed cluster and set up RBAC users
 if [[ "${RBAC_SETUP:-"true"}" == "true" ]]; then
@@ -123,10 +135,16 @@ oc -n open-cluster-management patch $(oc -n open-cluster-management get helmrele
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
   echo "$(date) ##### Posting information to Slack"
-  # Retrieve cluster information
-  GREETING=":mostly_sunny: Good Morning! Here's your \`${CLUSTERCLAIM_NAME}\` cluster for $(date "+%A, %B %d, %Y")"
+  # Point to claimed cluster and retrieve cluster information
+  export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
+  # Set greeting based on error code from StartRHACM
+  if [[ -z "ERROR_CODE" ]]; then
+    GREETING=":red_circle: RHACM deployment failed. The \`${CLUSTERCLAIM_NAME}\` cluster for $(date "+%A, %B %d, %Y") may need to be debugged before use."
+  else
+    GREETING=":mostly_sunny: Good Morning! Here's your \`${CLUSTERCLAIM_NAME}\` cluster for $(date "+%A, %B %d, %Y")"
+  fi
   SNAPSHOT=$(oc get catalogsource acm-custom-registry -n openshift-marketplace -o jsonpath='{.spec.image}' | grep -o "[0-9]\+\..*SNAPSHOT.*$")
-  RHACM_URL=$(oc get routes multicloud-console -o jsonpath='{.status.ingress[0].host}')
+  RHACM_URL=$(oc get routes multicloud-console -o jsonpath='{.status.ingress[0].host}' || echo "(No RHACM route found.)")
   unset KUBECONFIG
   # Get expiration time from the ClusterClaim
   CLAIM_CREATION=$(oc get clusterclaim.hive ${CLUSTERCLAIM_NAME} -n ${CLUSTERPOOL_TARGET_NAMESPACE} -o jsonpath={.metadata.creationTimestamp})
@@ -152,3 +170,5 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
     curl -X POST -H 'Content-type: application/json' --data "${CREDENTIAL_DATA}" ${SLACK_URL}
   fi
 fi
+
+exit ${ERROR_CODE}

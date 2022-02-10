@@ -57,7 +57,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 0
+      backoffLimit: 1
       template:
         spec:
           serviceAccountName: ${SERVICE_ACCOUNT_NAME}
