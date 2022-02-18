@@ -129,8 +129,20 @@ sleep 600
 # Point to claimed cluster
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
 
-# Try to install dynamic plugin
-oc -n open-cluster-management patch $(oc -n open-cluster-management get helmreleases -o name | grep "console-chart") --type json --patch '[{"op": "add", "path": "/spec/plugin", "value": true}]' || true
+# Try to enable dynamic plugins + feature gate
+oc -n open-cluster-management patch $(oc -n open-cluster-management get helmreleases -o name | grep "console-chart") --type json --patch '[{"op": "add", "path": "/spec/ocpVersion", "value": "4.10.0"}]'
+git clone https://github.com/stolostron/console-mce-chart.git
+cd console-mce-chart/stable/console-mce-chart
+helm install -n multicluster-engine console-mce . --set-string global.imageOverrides.console=quay.io/stolostron/console-mce:latest,ocpVersion=4.10.0
+oc patch console.operator.openshift.io cluster --type json --patch '[{"op": "add", "path": "/spec/plugins", "value":["mce","acm"]}]'
+oc apply -f - << YAML_END
+apiVersion: config.openshift.io/v1
+kind: FeatureGate
+metadata:
+  name: cluster
+spec:
+  featureSet: TechPreviewNoUpgrade
+YAML_END
 
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
