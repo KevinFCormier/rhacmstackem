@@ -129,13 +129,7 @@ sleep 600
 # Point to claimed cluster
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
 
-# Try to enable dynamic plugins + feature gate
-oc -n open-cluster-management patch $(oc -n open-cluster-management get helmreleases -o name | grep "console-chart") --type json --patch '[{"op": "add", "path": "/spec/ocpVersion", "value": "4.10.0"}]'
-oc -n open-cluster-management patch $(oc -n open-cluster-management get helmreleases -o name | grep "console-chart") --type json --patch '[{"op": "add", "path": "/spec/hubconfig/ocpVersion", "value": "4.10.0"}]'
-git clone https://github.com/stolostron/console-mce-chart.git
-cd console-mce-chart/stable/console-mce-chart
-helm install -n multicluster-engine console-mce . --set-string global.imageOverrides.console=quay.io/stolostron/console-mce:latest,ocpVersion=4.10.0,pullSecret=multiclusterhub-operator-pull-secret
-oc patch console.operator.openshift.io cluster --type json --patch '[{"op": "add", "path": "/spec/plugins", "value":["mce","acm"]}]'
+# Try to enable feature gate
 oc apply -f - << YAML_END
 apiVersion: config.openshift.io/v1
 kind: FeatureGate
