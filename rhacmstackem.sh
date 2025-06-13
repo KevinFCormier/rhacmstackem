@@ -7,7 +7,7 @@ ERROR_CODE=0
 # Clone requisite repos and store paths
 echo "$(date) ##### Cloning Lifeguard, Deploy, Pipeline, and StartRHACM repos"
 git clone https://github.com/KevinFCormier/startrhacm.git
-git clone https://github.com/stolostron/lifeguard.git
+git clone https://github.com/KevinFCormier/lifeguard.git
 git clone "https://${GIT_USER}:${GIT_TOKEN}@github.com/stolostron/pipeline.git"
 git clone https://github.com/stolostron/deploy.git
 git clone https://github.com/stolostron/cluster-keeper.git
@@ -130,14 +130,14 @@ sleep 600
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
 
 # Try to enable feature gate
-oc apply -f - << YAML_END
-apiVersion: config.openshift.io/v1
-kind: FeatureGate
-metadata:
-  name: cluster
-spec:
-  featureSet: TechPreviewNoUpgrade
-YAML_END
+# oc apply -f - << YAML_END
+# apiVersion: config.openshift.io/v1
+# kind: FeatureGate
+# metadata:
+#   name: cluster
+# spec:
+#   featureSet: TechPreviewNoUpgrade
+# YAML_END
 
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
@@ -151,7 +151,6 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
     GREETING=":mostly_sunny: Good Morning! Here's your \`${CLUSTERCLAIM_NAME}\` cluster for $(date "+%A, %B %d, %Y")"
   fi
   SNAPSHOT=$(oc get catalogsource acm-custom-registry -n openshift-marketplace -o jsonpath='{.spec.image}' | grep -o "[0-9]\+\..*SNAPSHOT.*$")
-  RHACM_URL=$(oc get routes multicloud-console -o jsonpath='{.status.ingress[0].host}' || echo "(No RHACM route found.)")
   unset KUBECONFIG
   # Get expiration time from the ClusterClaim
   CLAIM_CREATION=$(oc get clusterclaim.hive ${CLUSTERCLAIM_NAME} -n ${CLUSTERPOOL_TARGET_NAMESPACE} -o jsonpath={.metadata.creationTimestamp})
@@ -159,8 +158,8 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
   CLAIM_EXPIRATION=$(date -d "${CLAIM_CREATION}${LIFETIME_DIFF}-20min" +%s)
   LIFETIME="${CLUSTERCLAIM_LIFETIME} from $(date -d "${CLAIM_CREATION}" "+%I:%M %p %Z")"
   CREDENTIAL_DATA=$(jq -r 'to_entries[] | "*\(.key)*: \(.value)"' ${LIFEGUARD_PATH}/clusterclaims/*/*.creds.json \
-    | awk -v GREETING="${GREETING}" -v LIFETIME="${LIFETIME}" -v SNAPSHOT="${SNAPSHOT}" -v RBAC_INFO="${RBAC_INFO}" -v RHACM_URL="${RHACM_URL}" \
-    'BEGIN{printf "{\"text\":\""GREETING"\\n*Lifetime*: "LIFETIME"\\n*Snapshot*: "SNAPSHOT"\\n"RBAC_INFO};{printf "%s\\n", $0};END{printf "*RHACM URL*: "RHACM_URL"\\n\"}"}')
+    | awk -v GREETING="${GREETING}" -v LIFETIME="${LIFETIME}" -v SNAPSHOT="${SNAPSHOT}" -v RBAC_INFO="${RBAC_INFO}" \
+    'BEGIN{printf "{\"text\":\""GREETING"\\n*Lifetime*: "LIFETIME"\\n*Snapshot*: "SNAPSHOT"\\n"RBAC_INFO};{printf "%s\\n", $0};END{printf "\"}"}')
   # Prefer using token and Slack API for both credentials and scheduled expiration post (Fall back to Incoming Webhook to post credentials to Slack (no expiration post))
   if [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]]; then
     # Post credentials to Slack using the Slack API
