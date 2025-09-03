@@ -137,6 +137,9 @@ fi
 # Back to ClusterPool host
 unset KUBECONFIG
 
+CLUSTERDEPLOYMENT=$(oc get -n ${CLUSTERPOOL_TARGET_NAMESPACE} clusterclaim.hive ${CLUSTERCLAIM_NAME} -o jsonpath='{.spec.namespace}')
+echo "ClusterDeployment name: ${CLUSTERDEPLOYMENT}"
+
 # Enable service accounts for use with cluster-keeper
 echo "##### Enabling service accounts for cluster-keeper #####"
 oc config set-context ck
@@ -152,6 +155,10 @@ fi
 
 echo "##### Waiting 10 minutes for ACM route to be created #####"
 sleep 600
+
+# Add certificate
+CERT_DURATION="168h0m0s"
+./cluster-cert/apply-apps-cert.sh "${CLUSTERDEPLOYMENT}" "${HOSTED_ZONE_NAME}" "${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig" "${CERT_DURATION}"
 
 # Point to claimed cluster
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
