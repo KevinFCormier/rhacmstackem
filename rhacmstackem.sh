@@ -133,7 +133,7 @@ sleep 600
 
 # Add certificate
 CERT_DURATION="168h0m0s"
-./cluster-cert/apply-apps-cert.sh "${CLUSTERDEPLOYMENT}" "${HOSTED_ZONE_NAME}" "${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig" "${CERT_DURATION}"
+./cluster-cert/apply-apps-cert.sh "${CLUSTERDEPLOYMENT}" "${HOSTED_ZONE_NAME}" "${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig" "console-squad" "${CERT_DURATION}"
 
 # Point to claimed cluster
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
