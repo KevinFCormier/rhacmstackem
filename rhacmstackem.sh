@@ -173,10 +173,6 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
       SNAPSHOT=$(jq -r '.Labels."konflux.additional-tags"' inspect.json)
     fi
     
-    RHACM_URL=$(oc get routes console -n openshift-console -o jsonpath='{.status.ingress[0].host}' || echo "(No RHACM route found.)")
-    if [[ "${RHACM_URL}" != "(No RHACM route found.)" ]]; then
-      RHACM_URL="https://${RHACM_URL}/multicloud/home/welcome"
-    fi
     # Get expiration time from the ClusterClaim
     unset KUBECONFIG
     CLAIM_CREATION=$(oc get clusterclaim.hive ${CLUSTERCLAIM_NAME} -n ${CLUSTERPOOL_TARGET_NAMESPACE} -o jsonpath={.metadata.creationTimestamp})
@@ -185,8 +181,8 @@ if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHAN
     LIFETIME="${CLUSTERCLAIM_LIFETIME} from $(date -d "${CLAIM_CREATION}" "+%I:%M %p %Z")"
     OCP_LOGIN="$(tail -1 ${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/oc-login.sh)"
     CREDENTIAL_DATA=$(jq -r 'to_entries[] | "*\(.key)*: \(.value)"' ${LIFEGUARD_PATH}/clusterclaims/*/*.creds.json \
-      | awk -v GREETING="${GREETING}" -v LIFETIME="${LIFETIME}" -v SNAPSHOT="${SNAPSHOT}" -v RBAC_INFO="${RBAC_INFO}" -v RHACM_URL="${RHACM_URL}" -v OCP_LOGIN="${OCP_LOGIN}" \
-      'BEGIN{printf "{\"text\":\""GREETING"\\n*Lifetime*: "LIFETIME"\\n*Snapshot*: "SNAPSHOT"\\n"RBAC_INFO};{printf "%s\\n", $0};END{printf "*RHACM URL*: "RHACM_URL"\\n```"OCP_LOGIN"```\"}"}')
+      | awk -v GREETING="${GREETING}" -v LIFETIME="${LIFETIME}" -v SNAPSHOT="${SNAPSHOT}" -v RBAC_INFO="${RBAC_INFO}" -v OCP_LOGIN="${OCP_LOGIN}" \
+      'BEGIN{printf "{\"text\":\""GREETING"\\n*Lifetime*: "LIFETIME"\\n*Snapshot*: "SNAPSHOT"\\n"RBAC_INFO};{printf "%s\\n", $0};END{printf "```"OCP_LOGIN"```\"}"}')
   else
     CREDENTIAL_DATA="{\"text\":\"${GREETING}\n(ClusterClaim failed to deploy.)\"}"
   fi
