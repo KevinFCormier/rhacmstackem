@@ -2,7 +2,7 @@
 
 Image to provision an OCP cluster from a ClusterPool with the latest RHACM deployed using [StartRHACM](https://github.com/dhaiducek/startrhacm)
 
-Image URL: `quay.io/dhaiduce/rhacmstackem`
+Image URL: `quay.io/kcormier/rhacmstackem`
 
 ## CronJob Deployment
 
