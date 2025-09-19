@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 # Add RHACMStackEm script and YAML resources
 ADD rhacmstackem.sh .
