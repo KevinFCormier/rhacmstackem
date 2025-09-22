@@ -37,11 +37,13 @@ Image URL: `quay.io/kcormier/rhacmstackem`
   export CLUSTERPOOL_POST_DEPLOY_SIZE="" # Set the size of the ClusterPool post-deployment
   export CLUSTERCLAIM_NAME="" # Name to use for ClusterClaim (default: "rhacmstackem-${CLUSTERPOOL_NAME}")
   export CLUSTERCLAIM_LIFETIME="" # Lifetime of claimed cluster (default: "12h")
-  export AUTH_REDIRECT_PATHS="" # Oauth redirect paths in a space-separated string (default: "") Example: "/ /path1/ /path2/"
   export RBAC_SETUP="" # Whether to set up RBAC users on the cluster (default: "true")
   export RBAC_IDP_NAME="" # Custom name for identity provider (default: "e2e-htpasswd")
   export INSTALL_ICSP="" # Whether to install ImageContentSourcePolicy to access downstream repos (default: "false")
   export CLAIM_REUSE="" # Controls initial cleanup behavior (default: "delete"): "delete" - Delete existing claims prior to a deploy; "update" - Reuse existing claim; Any other non-empty value will exit the script and not attempt to deploy
+  export CONSOLE_BANNER_TEXT="" # Text to put in a banner at the top of the OpenShift console (Use "default" to advertise for RHACMStackEm, leave empty to skip the banner)
+  export CONSOLE_BANNER_COLOR="#fff" # Color of the text in the banner
+  export CONSOLE_BANNER_BGCOLOR="#316DC1" # Color of the banner
   export SCHEDULE="" # Set a custom CronJob schedule (default: "15 11 * * 1-5")
   export SCHEDULED_HIBERNATION="" # Set to "true" to enable scheduled hibernation by hibernate-cronjob (default: "false")
   ```
