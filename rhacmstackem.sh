@@ -165,7 +165,7 @@ if [[ "${INSTALL_AAP:-"false"}" == "true" ]]; then
   git clone --depth 1 --filter=blob:none --sparse https://github.com/stolostron/console.git
   pushd console && git sparse-checkout set scripts/aap-automation && popd
   export RH_OFFLINE_TOKEN="${RH_OFFLINE_TOKEN}"
-  ./console/scripts/aap-automation/aap-install-wrapper.sh || echo "$(date) WARNING: AAP installation failed (non-blocking)"
+  ./console/scripts/aap-automation/install-aap.sh || echo "$(date) WARNING: AAP installation failed (non-blocking)"
 fi
 
 # Send cluster information to Slack
