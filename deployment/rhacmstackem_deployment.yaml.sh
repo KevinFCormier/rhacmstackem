@@ -117,6 +117,14 @@ spec:
               value: "${CLAIM_REUSE}" 
             - name: SCHEDULED_HIBERNATION
               value: "${SCHEDULED_HIBERNATION:-false}"
+            - name: INSTALL_AAP
+              value: "${INSTALL_AAP:-false}"
+            - name: RH_OFFLINE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rh-offline-token
+                  key: token
+                  optional: true
 EOF
 
 echo ""
