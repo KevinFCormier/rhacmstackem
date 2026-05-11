@@ -117,6 +117,24 @@ spec:
               value: "${CLAIM_REUSE}" 
             - name: SCHEDULED_HIBERNATION
               value: "${SCHEDULED_HIBERNATION:-false}"
+            - name: INSTALL_AAP
+              value: "${INSTALL_AAP:-false}"
+            - name: RH_OFFLINE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rh-offline-token
+                  key: token
+                  optional: true
+            - name: AAP_OPERATOR_CHANNEL
+              value: "${AAP_OPERATOR_CHANNEL:-stable-2.5-cluster-scoped}"
+            - name: AAP_MODE
+              value: "${AAP_MODE:-platform}"
+            - name: AAP_ENABLE_HUB
+              value: "${AAP_ENABLE_HUB:-false}"
+            - name: AAP_ENABLE_EDA
+              value: "${AAP_ENABLE_EDA:-false}"
+            - name: AAP_CURL_INSECURE
+              value: "${AAP_CURL_INSECURE:-true}"
 EOF
 
 echo ""

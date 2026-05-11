@@ -159,6 +159,19 @@ fi
 # Point to claimed cluster
 export KUBECONFIG=${LIFEGUARD_PATH}/clusterclaims/${CLUSTERCLAIM_NAME}/kubeconfig
 
+# Install Ansible Automation Platform (opt-in, requires RH_OFFLINE_TOKEN)
+if [[ "${INSTALL_AAP:-"false"}" == "true" ]]; then
+  echo "$(date) ##### Installing Ansible Automation Platform"
+  git clone --depth 1 --filter=blob:none --sparse https://github.com/stolostron/console.git
+  pushd console && git sparse-checkout set scripts/aap-automation && popd
+  export OPERATOR_CHANNEL="${AAP_OPERATOR_CHANNEL:-stable-2.5-cluster-scoped}"
+  export AAP_MODE="${AAP_MODE:-platform}"
+  export ENABLE_HUB="${AAP_ENABLE_HUB:-false}"
+  export ENABLE_EDA="${AAP_ENABLE_EDA:-false}"
+  export CURL_INSECURE="${AAP_CURL_INSECURE:-true}"
+  ./console/scripts/aap-automation/install-aap.sh || echo "$(date) WARNING: AAP installation failed (non-blocking)"
+fi
+
 # Send cluster information to Slack
 if [[ -n "${SLACK_URL}" ]] || ( [[ -n "${SLACK_TOKEN}" ]] && [[ -n "${SLACK_CHANNEL_ID}" ]] ); then
   echo "$(date) ##### Posting information to Slack"
